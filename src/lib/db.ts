@@ -4,26 +4,42 @@ import { Project } from "@/types";
 export async function getProjects(userId: string): Promise<Project[]> {
   const supabase = await createClient();
 
-  const { data: projects, error } = await supabase
+  // First get all projects
+  const { data: projects, error: projectsError } = await supabase
     .from("projects")
-    .select(`
-      *,
-      clients:clients(count)
-    `)
+    .select("*")
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching projects:", error);
-    throw error;
+  if (projectsError) {
+    console.error("Error fetching projects:", projectsError);
+    throw projectsError;
   }
 
-  return projects.map(project => ({
-    ...project,
-    _count: {
-      clients: project.clients?.[0]?.count ?? 0
-    }
-  }));
+  // Then get client counts for each project
+  const projectsWithCounts = await Promise.all(
+    projects.map(async (project) => {
+      const { count, error: countError } = await supabase
+        .from("clients")
+        .select("*", { count: "exact", head: true })
+        .eq("project_id", project.id);
+
+      if (countError) {
+        console.error(`Error fetching client count for project ${project.id}:`, countError);
+        return {
+          ...project,
+          _count: { clients: 0 }
+        };
+      }
+
+      return {
+        ...project,
+        _count: { clients: count || 0 }
+      };
+    })
+  );
+
+  return projectsWithCounts;
 }
 
 export async function createProject(
@@ -32,8 +48,6 @@ export async function createProject(
 ): Promise<Project> {
   const supabase = await createClient();
 
-  const uniqueLink = `${process.env.NEXT_PUBLIC_BASE_URL}/waitlist/${crypto.randomUUID()}`;
-
   const { data: project, error } = await supabase
     .from("projects")
     .insert([
@@ -41,7 +55,6 @@ export async function createProject(
         user_id: userId,
         name: data.name,
         description: data.description,
-        unique_link: uniqueLink,
       },
     ])
     .select()
@@ -52,5 +65,8 @@ export async function createProject(
     throw error;
   }
 
-  return project;
-} 
+  return {
+    ...project,
+    _count: { clients: 0 }
+  };
+}
