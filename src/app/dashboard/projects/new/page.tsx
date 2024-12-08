@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
 
 type FormField = {
   id: string;
@@ -102,7 +103,7 @@ function FormFieldItem({
           onValueChange={(value) => updateField(field.id, { type: value })}
         >
           <SelectTrigger className="bg-slate-800 border-slate-700 text-white">
-            <SelectValue placeholder="Field Type" />
+            <SelectValue placeholder="Select field type" />
           </SelectTrigger>
           <SelectContent>
             {fieldTypes.map((type) => (
@@ -113,21 +114,28 @@ function FormFieldItem({
           </SelectContent>
         </Select>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
             <Switch
+              id={`required-${field.id}`}
               checked={field.required}
               onCheckedChange={(checked) =>
                 updateField(field.id, { required: checked })
               }
             />
-            <Label className="text-white">Required</Label>
+            <Label
+              htmlFor={`required-${field.id}`}
+              className="text-sm text-gray-400"
+            >
+              Required
+            </Label>
           </div>
 
           <Button
             type="button"
             variant="ghost"
-            className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+            size="icon"
+            className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10"
             onClick={() => removeField(field.id)}
           >
             <Trash2 className="h-4 w-4" />
@@ -157,18 +165,26 @@ export default function CreateProject() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const { data, error } = await supabase.auth.getUser();
-      if (error) {
-        console.log(error.message);
-        router.push("/login");
-      } else {
-        setProject((prev) => ({ ...prev, user_id: data.user.id }));
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        
+        if (error || !user) {
+          toast.error("Please sign in to continue");
+          router.push("/login");
+          return;
+        }
+
+        setProject((prev) => ({ ...prev, user_id: user.id }));
         setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        toast.error("An error occurred while loading your data");
+        router.push("/login");
       }
     };
 
     fetchUser();
-  }, [supabase, router]);
+  }, [router, supabase.auth]);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -216,7 +232,35 @@ export default function CreateProject() {
     setFormFields(newFields);
   };
 
+  const validateForm = () => {
+    if (!project.name.trim()) {
+      toast.error("Project name is required");
+      return false;
+    }
+
+    if (!project.description.trim()) {
+      toast.error("Project description is required");
+      return false;
+    }
+
+    if (formFields.length === 0) {
+      toast.error("At least one form field is required");
+      return false;
+    }
+
+    for (const field of formFields) {
+      if (!field.label.trim()) {
+        toast.error("All fields must have a label");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   const handleCreate = async () => {
+    if (!validateForm()) return;
+
     try {
       setSubmitting(true);
 
@@ -240,15 +284,18 @@ export default function CreateProject() {
           label: field.label,
           type: field.type,
           required: field.required,
+          order: index,
         }))
       );
 
       if (fieldsError) throw fieldsError;
 
+      toast.success("Project created successfully!");
       router.push("/dashboard");
       router.refresh();
     } catch (error: any) {
-      console.log(error.message);
+      console.error("Error creating project:", error);
+      toast.error(error.message || "Failed to create project");
     } finally {
       setSubmitting(false);
     }
@@ -316,9 +363,7 @@ export default function CreateProject() {
 
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h3 className="text-lg font-semibold text-white">
-                  Form Fields
-                </h3>
+                <h3 className="text-lg font-semibold text-white">Form Fields</h3>
                 <Button
                   type="button"
                   onClick={addField}
@@ -345,25 +390,23 @@ export default function CreateProject() {
               </div>
             </div>
 
-            <Button
-              className="w-full hero-button"
-              type="button"
-              onClick={handleCreate}
-              disabled={
-                submitting ||
-                !project.name ||
-                !project.description ||
-                formFields.length === 0 ||
-                formFields.some((field) => !field.label)
-              }
-            >
-              {submitting ? (
-                <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <ListPlus className="mr-2 h-4 w-4" />
-              )}
-              {submitting ? "Creating Project..." : "Create Project"}
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={handleCreate}
+                disabled={submitting}
+                className="w-full sm:w-auto"
+              >
+                {submitting ? (
+                  <>
+                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Project"
+                )}
+              </Button>
+            </div>
           </form>
         </CardContent>
       </Card>
