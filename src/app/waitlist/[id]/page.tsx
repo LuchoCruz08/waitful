@@ -4,17 +4,11 @@ import { redirect } from "next/navigation";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type PageProps = {
-  params: {
-    id: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
 export default async function WaitlistPage({
   params,
-  searchParams,
-}: PageProps) {
+}: {
+  params: { id: string };
+}) {
   const supabase = await createClient();
 
   const { id: projectId } = params;
