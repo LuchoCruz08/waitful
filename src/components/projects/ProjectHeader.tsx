@@ -39,7 +39,7 @@ export function ProjectHeader({ project }: { project: Project }) {
 
   const handleCopyLink = () => {
     const baseUrl = window.location.origin;
-    const waitlistUrl = `${baseUrl}/waitlist/${project.id}`;
+    const waitlistUrl = `/waitlist/${project.id}`;
 
     navigator.clipboard.writeText(waitlistUrl);
     toast.success(
@@ -194,7 +194,7 @@ export function ProjectHeader({ project }: { project: Project }) {
         <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
           <DialogContent className="bg-slate-900 border-slate-800">
             <DialogHeader>
-              <DialogTitle>Delete Project</DialogTitle>
+              <DialogTitle className="text-white">Delete Project</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-slate-400">
