@@ -18,7 +18,12 @@ const faqData: FAQItem[] = [
   {
     question: "What is Waitful?",
     answer:
-      "Waitful is a powerful waitlist management platform that helps businesses and organizations efficiently collect and manage subscriber information for upcoming products, services, or events.",
+      "Waitful is a waitlist management platform that helps businesses and organizations efficiently collect and manage subscriber information for upcoming products, services, or events.",
+  },
+  {
+    question: "Who can use Waitful?",
+    answer:
+      "Waitful is perfect for businesses, creators, event organizers, and anyone who needs an efficient way to manage a waitlist for their products, services, or events.",
   },
   {
     question: "How do I create a waitlist?",
@@ -28,7 +33,7 @@ const faqData: FAQItem[] = [
   {
     question: "Can I customize the waitlist form?",
     answer:
-      "Yes, Waitful allows you to fully customize your waitlist form. You can add, remove, and edit form fields to collect the specific information you need from your subscribers.",
+      "Yes, Waitful allows you to customize your waitlist form. You can add, remove, and edit form fields to collect the specific information you need from your subscribers.",
   },
   {
     question: "How do I access my waitlist data?",
@@ -36,9 +41,19 @@ const faqData: FAQItem[] = [
       "You can access your waitlist data anytime through your Waitful dashboard. Navigate to your project, and you'll see options to view, export, and manage your subscriber list.",
   },
   {
+    question: "Is Waitful free to use?",
+    answer:
+      "Waitful offers a 14-day free trial with no credit card or payment information required. During this period, you can explore all the platform's features. After the trial ends, you can choose from two subscription options: a monthly plan for $10 or an annual plan for $96, offering a discounted rate. If you decide not to subscribe, your account and associated data will no longer be accessible after the trial period.",
+  },
+  {
     question: "Is my waitlist data secure?",
     answer:
-      "Yes, we take data security seriously. All data is encrypted and stored securely. We comply with data protection regulations to ensure your subscribers' information is safe.",
+      "Yes, we take data security seriously. All data is stored securely. We comply with data protection regulations to ensure your subscribers' information is safe.",
+  },
+  {
+    question: "How can I contact Waitful for support or inquiries?",
+    answer:
+      "To contact Waitful support, please send an email to lucianovcruz2004@gmail.com. Please be sure to include 'Waitful: ' followed by the type of inquiry (e.g. question, issue, comment) in the subject line to ensure your message receives a prompt and clear response.",
   },
 ];
 

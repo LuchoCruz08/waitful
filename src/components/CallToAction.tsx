@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function CallToAction() {
   return (
@@ -35,16 +35,12 @@ export function CallToAction() {
               Start managing your waitlists today!
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-xl text-blue-50 mb-10">
-              Join hundreds of businesses using Waitful to manage their waitlists efficiently and grow their audience.
+              Join Waitful to manage their waitlists efficiently and grow their audience.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <Button className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 Join the Waitlist
                 <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              <Button variant="outline" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-                Learn More
-                <Sparkles className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </div>

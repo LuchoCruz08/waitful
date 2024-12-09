@@ -20,14 +20,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Pencil, Search, Trash2 } from "lucide-react";
+import { Download, Pencil, Search, Trash2, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
+interface Subscriber {
+  id: string;
+  created_at: string;
+  data: Record<string, any>;
+  project_id: string;
+}
+
 export function SubscribersList({ projectId }: { projectId: string }) {
-  const [subscribers, setSubscribers] = useState<any[]>([]);
+  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingSubscriber, setEditingSubscriber] = useState<any>(null);
+  const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
   const [exporting, setExporting] = useState(false);
   const supabase = createClient();
 
@@ -36,77 +43,138 @@ export function SubscribersList({ projectId }: { projectId: string }) {
   }, [projectId]);
 
   const fetchSubscribers = async () => {
-    const { data, error } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("project_id", projectId)
-      .order("created_at", { ascending: false });
+    try {
+      const { data: formFields, error: fieldsError } = await supabase
+        .from("form_fields")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("order", { ascending: true });
 
-    if (error) {
+      if (fieldsError) throw fieldsError;
+
+      const { data: subscribers, error: subsError } = await supabase
+        .from("clients")
+        .select("*")
+        .eq("project_id", projectId)
+        .order("created_at", { ascending: false });
+
+      if (subsError) throw subsError;
+
+      // Ensure data is properly formatted
+      const formattedSubscribers = subscribers.map(sub => ({
+        ...sub,
+        data: typeof sub.data === 'string' ? JSON.parse(sub.data) : sub.data
+      }));
+
+      setSubscribers(formattedSubscribers);
+    } catch (error) {
+      console.error("Error fetching data:", error);
       toast.error("Failed to fetch subscribers");
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    setSubscribers(data || []);
-    setLoading(false);
   };
 
   const handleEdit = async (updatedData: any) => {
-    const { error } = await supabase
-      .from("clients")
-      .update({ data: updatedData })
-      .eq("id", editingSubscriber.id);
+    if (!editingSubscriber) return;
 
-    if (error) {
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .update({ data: updatedData })
+        .eq("id", editingSubscriber.id);
+
+      if (error) throw error;
+
+      setEditingSubscriber(null);
+      await fetchSubscribers();
+      toast.success("Subscriber updated successfully");
+    } catch (error) {
+      console.error("Error updating subscriber:", error);
       toast.error("Failed to update subscriber");
-      return;
     }
-
-    setEditingSubscriber(null);
-    fetchSubscribers();
-    toast.success("Subscriber updated");
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("clients").delete().eq("id", id);
+    try {
+      const { error } = await supabase
+        .from("clients")
+        .delete()
+        .eq("id", id);
 
-    if (error) {
+      if (error) throw error;
+
+      await fetchSubscribers();
+      toast.success("Subscriber deleted successfully");
+    } catch (error) {
+      console.error("Error deleting subscriber:", error);
       toast.error("Failed to delete subscriber");
-      return;
     }
-
-    fetchSubscribers();
-    toast.success("Subscriber deleted");
   };
 
-  const convertToCSV = (subscribers: any[]) => {
-    if (subscribers.length === 0) return "";
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleString();
+  };
 
-    const headers = Object.keys(subscribers[0].data);
-    const headerRow = headers.join(",");
+  const prepareExportData = (subscribers: Subscriber[]) => {
+    if (subscribers.length === 0) return { headers: [], rows: [] };
 
-    const rows = subscribers.map((subscriber) => {
-      return headers
-        .map((header) => {
-          const value = subscriber.data[header];
-          if (
-            typeof value === "string" &&
-            (value.includes(",") || value.includes('"'))
-          ) {
-            return `"${value.replace(/"/g, '""')}"`;
-          }
-          return value;
-        })
-        .join(",");
+    // Get all unique fields from all subscribers
+    const allFields = new Set<string>();
+    subscribers.forEach(subscriber => {
+      Object.keys(subscriber.data || {}).forEach(key => allFields.add(key));
     });
 
-    return `${headerRow}\n${rows.join("\n")}`;
+    // Create headers with standard fields first, then custom fields
+    const headers = ["Submission Date", ...Array.from(allFields)];
+
+    // Create rows with all fields
+    const rows = subscribers.map(subscriber => {
+      const row: Record<string, any> = {
+        "Submission Date": formatDate(subscriber.created_at),
+      };
+
+      // Add all fields, using empty string for missing values
+      Array.from(allFields).forEach(field => {
+        row[field] = subscriber.data[field] || "";
+      });
+
+      return row;
+    });
+
+    return { headers, rows };
+  };
+
+  const convertToCSV = (subscribers: Subscriber[]) => {
+    const { headers, rows } = prepareExportData(subscribers);
+    if (headers.length === 0) return "";
+
+    const csvRows = [
+      // Headers row
+      headers.map(header => `"${header}"`).join(","),
+      // Data rows
+      ...rows.map(row =>
+        headers
+          .map(header => {
+            const value = row[header];
+            // Handle values that need escaping
+            if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+          })
+          .join(",")
+      ),
+    ];
+
+    return csvRows.join("\n");
   };
 
   const handleExport = async () => {
     try {
       setExporting(true);
 
+      // Fetch fresh data for export
       const { data: exportData, error: exportError } = await supabase
         .from("clients")
         .select("*")
@@ -115,29 +183,37 @@ export function SubscribersList({ projectId }: { projectId: string }) {
 
       if (exportError) throw exportError;
 
-      const csv = convertToCSV(exportData);
+      // Format the data
+      const formattedData = exportData.map(sub => ({
+        ...sub,
+        data: typeof sub.data === 'string' ? JSON.parse(sub.data) : sub.data
+      }));
 
-      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
+      // Convert to CSV
+      const csv = convertToCSV(formattedData);
+
+      // Create and download the file
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
-
+      const link = document.createElement("a");
       const date = new Date().toISOString().split("T")[0];
       const filename = `waitlist-export-${date}.csv`;
 
-      link.setAttribute("href", url);
+      link.href = url;
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
-      const { error: recordError } = await supabase.from("exports").insert([
-        {
-          project_id: projectId,
-          user_id: (await supabase.auth.getUser()).data.user?.id,
-        },
-      ]);
+      // Record the export
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error: recordError } = await supabase
+          .from("exports")
+          .insert([{ project_id: projectId, user_id: user.id }]);
 
-      if (recordError) throw recordError;
+        if (recordError) throw recordError;
+      }
 
       toast.success("Export completed successfully");
     } catch (error) {
@@ -156,12 +232,18 @@ export function SubscribersList({ projectId }: { projectId: string }) {
 
   if (loading) {
     return (
-      <div className="text-center text-gray-400">Loading subscribers...</div>
+      <div className="flex items-center justify-center py-8">
+        <LoaderCircle className="h-8 w-8 text-blue-500 animate-spin" />
+      </div>
     );
   }
 
   if (subscribers.length === 0) {
-    return <div className="text-center text-gray-400">No subscribers yet.</div>;
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-400">No subscribers yet.</div>
+      </div>
+    );
   }
 
   return (
@@ -184,7 +266,7 @@ export function SubscribersList({ projectId }: { projectId: string }) {
         >
           {exporting ? (
             <>
-              <span className="animate-spin mr-2">⏳</span>
+              <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />
               Exporting...
             </>
           ) : (
@@ -200,9 +282,9 @@ export function SubscribersList({ projectId }: { projectId: string }) {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="text-white">Submission Date</TableHead>
               {subscribers.length > 0 &&
-                subscribers[0].data &&
-                Object.keys(subscribers[0].data).map((key) => (
+                Object.keys(subscribers[0].data || {}).map((key) => (
                   <TableHead key={key} className="text-white">
                     {key}
                   </TableHead>
@@ -213,6 +295,9 @@ export function SubscribersList({ projectId }: { projectId: string }) {
           <TableBody>
             {filteredSubscribers.map((subscriber) => (
               <TableRow key={subscriber.id}>
+                <TableCell className="text-gray-300">
+                  {formatDate(subscriber.created_at)}
+                </TableCell>
                 {Object.entries(subscriber.data || {}).map(([key, value]) => (
                   <TableCell key={key} className="text-gray-300">
                     {String(value)}
@@ -223,13 +308,14 @@ export function SubscribersList({ projectId }: { projectId: string }) {
                     variant="ghost"
                     size="icon"
                     onClick={() => setEditingSubscriber(subscriber)}
+                    className="text-gray-400 hover:text-white"
                   >
-                    <Pencil className="h-4 w-4 text-white" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-red-500"
+                    className="text-red-400 hover:text-red-300"
                     onClick={() => handleDelete(subscriber.id)}
                   >
                     <Trash2 className="h-4 w-4" />

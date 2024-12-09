@@ -29,11 +29,6 @@ export function Header() {
         <Link href="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold gradient-text">Waitful</span>
         </Link>
-        <nav className="hidden md:flex items-center space-x-8">
-          <NavItem href="#features">Features</NavItem>
-          <NavItem href="#pricing">Pricing</NavItem>
-          <NavItem href="#about">About</NavItem>
-        </nav>
         <div className="hidden md:flex items-center space-x-4">
           <Link href="/login">
             <Button variant="outline" className="text-white border-white hover:bg-white hover:text-slate-950 transition-colors">
@@ -57,9 +52,6 @@ export function Header() {
       {isMenuOpen && (
         <div className="md:hidden bg-slate-950 p-4">
           <nav className="flex flex-col space-y-4">
-            <NavItem href="#features" mobile>Features</NavItem>
-            <NavItem href="#pricing" mobile>Pricing</NavItem>
-            <NavItem href="#about" mobile>About</NavItem>
             <Link href="/login">
               <Button variant="outline" className="w-full text-white border-white hover:bg-white hover:text-slate-950 transition-colors">
                 Log In
@@ -77,16 +69,4 @@ export function Header() {
   );
 }
 
-function NavItem({ href, children, mobile = false }: { href: string; children: React.ReactNode; mobile?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`text-slate-300 hover:text-white transition-colors ${
-        mobile ? "text-lg" : "text-sm font-medium"
-      }`}
-    >
-      {children}
-    </Link>
-  );
-}
 

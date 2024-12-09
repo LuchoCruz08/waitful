@@ -30,9 +30,15 @@ export default async function WaitlistPage({ params }: PageProps) {
     .from("form_fields")
     .select("*")
     .eq("project_id", project.id)
-    .order("created_at", { ascending: true });
+    .order("order", { ascending: true });
 
   if (formFieldsError) {
+    console.error("Error fetching form fields:", formFieldsError);
+    redirect("/404");
+  }
+
+  if (!formFields || formFields.length === 0) {
+    console.error("No form fields found for project:", project.id);
     redirect("/404");
   }
 
