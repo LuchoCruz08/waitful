@@ -1,13 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface PageProps {
-  params: { id: string };
-}
+type PageProps = {
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export default async function WaitlistPage({ params }: PageProps) {
+export default async function WaitlistPage({
+  params,
+  searchParams,
+}: PageProps) {
   const supabase = await createClient();
 
   const { id: projectId } = params;
