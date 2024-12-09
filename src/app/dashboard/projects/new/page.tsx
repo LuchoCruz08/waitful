@@ -284,7 +284,6 @@ export default function CreateProject() {
           label: field.label,
           type: field.type,
           required: field.required,
-          order: index,
         }))
       );
 
