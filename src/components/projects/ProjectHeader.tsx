@@ -39,7 +39,7 @@ export function ProjectHeader({ project }: { project: Project }) {
 
   const handleCopyLink = () => {
     const baseUrl = window.location.origin;
-    const waitlistUrl = `/waitlist/${project.id}`;
+    const waitlistUrl = `waitful.vercel.app/waitlist/${project.id}`;
 
     navigator.clipboard.writeText(waitlistUrl);
     toast.success(
