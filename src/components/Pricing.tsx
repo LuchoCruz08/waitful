@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 const features = [
   "Unlimited Waitlists",
@@ -72,9 +73,11 @@ export function Pricing() {
               )}
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
-              <Button className="w-full hero-button">
-                Start 14-Day Free Trial
-              </Button>
+              <Link href="https://waitful.vercel.app/waitlist/7702b68b-ce3d-4e87-84c3-1479b4a21858">
+                <Button className="w-full hero-button">
+                  Start 14-Day Free Trial
+                </Button>
+              </Link>
               <ul className="space-y-2 text-left">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-center text-gray-300">

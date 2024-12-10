@@ -18,7 +18,7 @@ export function Hero() {
             the ultimate tool for launches, events, and exclusive offerings.
           </p>
           <div className="flex justify-center animate-slide-up">
-            <Link href="/contact-form" passHref>
+            <Link href="https://waitful.vercel.app/waitlist/7702b68b-ce3d-4e87-84c3-1479b4a21858" passHref>
               <Button className="hero-button hover-lift text-lg px-8 py-4">
                 Join Our Waitlist <ArrowRight className="ml-2 h-5 w-5" />
               </Button>

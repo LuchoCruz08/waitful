@@ -35,7 +35,7 @@ export function Header() {
               Log In
             </Button>
           </Link>
-          <Link href="/signup">
+          <Link href="https://waitful.vercel.app/waitlist/7702b68b-ce3d-4e87-84c3-1479b4a21858">
             <Button className="hero-button">
               Get Started
               <ChevronDown className="ml-2 h-4 w-4" />

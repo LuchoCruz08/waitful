@@ -39,7 +39,7 @@ export function CallToAction() {
               Join Waitful to manage their waitlists efficiently and grow their audience.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-              <Link href="">
+              <Link href="https://waitful.vercel.app/waitlist/7702b68b-ce3d-4e87-84c3-1479b4a21858">
               <Button className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 Join the Waitlist
                 <ArrowRight className="ml-2 h-5 w-5" />
