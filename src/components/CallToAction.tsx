@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from 'lucide-react';
+import Link from "next/link";
 
 export function CallToAction() {
   return (
@@ -38,10 +39,12 @@ export function CallToAction() {
               Join Waitful to manage their waitlists efficiently and grow their audience.
             </p>
             <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <Link href="">
               <Button className="bg-white text-blue-600 hover:bg-blue-50 text-lg px-8 py-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                 Join the Waitlist
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+              </Link>
             </div>
           </div>
         </div>

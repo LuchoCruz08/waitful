@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { useState } from "react";
@@ -20,14 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import {
-  Copy,
-  Download,
-  Link2,
-  MoreVertical,
-  Pencil,
-  Trash2,
-} from "lucide-react";
+import { Link2, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { toast } from "sonner";
 
 export function ProjectHeader({ project }: { project: Project }) {
@@ -85,144 +77,105 @@ export function ProjectHeader({ project }: { project: Project }) {
     }
   };
 
-  const handleExportCSV = async () => {
-    try {
-      const { data: subscribers, error } = await supabase
-        .from("clients")
-        .select("*")
-        .eq("project_id", project.id);
-
-      if (error) throw error;
-
-      if (!subscribers || subscribers.length === 0) {
-        toast.info("No subscribers to export");
-        return;
-      }
-
-      const csvContent = [
-        Object.keys(subscribers[0]).join(","),
-        ...subscribers.map((item) => Object.values(item).join(",")),
-      ].join("\n");
-
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      if (link.download !== undefined) {
-        const url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `${project.name}_subscribers.csv`);
-        link.style.visibility = "hidden";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      toast.success("CSV exported successfully");
-    } catch (error) {
-      console.error("Error exporting CSV:", error);
-      toast.error("Failed to export CSV");
-    }
-  };
-
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-      <div className="flex items-center space-x-4 w-full sm:w-auto">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-slate-900/50 rounded-lg border border-slate-700">
+      <div className="flex-1 min-w-0 w-full sm:w-auto">
         {isEditing ? (
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full">
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="bg-slate-800 border-slate-700 text-white"
+              className="bg-slate-800 border-slate-700 text-white w-full sm:w-auto"
+              placeholder="Project name"
             />
-            <Button onClick={handleUpdateName}>Save</Button>
-            <Button variant="secondary" onClick={() => setIsEditing(false)}>
-              Cancel
-            </Button>
+            <div className="flex gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
+              <Button
+                onClick={handleUpdateName}
+                className="bg-blue-600 hover:bg-blue-700 flex-1 sm:flex-none"
+              >
+                Save
+              </Button>
+              <Button
+                onClick={() => setIsEditing(false)}
+                variant="ghost"
+                className="flex-1 sm:flex-none"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         ) : (
-          <h1 className="text-2xl font-bold text-white">{project.name}</h1>
+          <h2 className="text-xl font-semibold text-white truncate">
+            {project.name}
+          </h2>
         )}
       </div>
 
-      <div className="flex items-center space-x-2 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full sm:w-auto">
         <Button
-          variant="outline"
-          className="border-blue-500 text-blue-500 w-full sm:w-auto"
           onClick={handleCopyLink}
+          variant="outline"
+          className="flex-1 sm:flex-none border-blue-500 text-blue-500"
         >
           <Link2 className="h-4 w-4 mr-2" />
-          Copy Link
-        </Button>
-
-        <Button
-          variant="outline"
-          className="border-green-500 text-green-500 w-full sm:w-auto"
-          onClick={handleExportCSV}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export CSV
+          <span className="hidden sm:inline">Share Link</span>
+          <span className="sm:hidden">Share</span>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button  className="h-8 w-8 p-0">
+            <Button
+              variant="ghost"
+              className="h-8 w-8 p-0 text-gray-400 hover:text-white"
+            >
+              <span className="sr-only">Open menu</span>
               <MoreVertical className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-              <Pencil className="h-4 w-4 mr-2" />
-              Edit Name
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleCopyLink}>
-              <Copy className="h-4 w-4 mr-2" />
-              Copy Link
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={handleExportCSV}>
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-red-500 focus:text-red-500"
-              onClick={() => setIsDeleteDialogOpen(true)}
+              onClick={() => setIsEditing(true)}
+              className="text-blue-500"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Project
+              <Pencil className="h-4 w-4 mr-2" />
+              Rename
             </DropdownMenuItem>
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <DropdownMenuItem className="text-red-500">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete Project</DialogTitle>
+                </DialogHeader>
+                <p className="text-gray-400">
+                  Are you sure you want to delete this project? This action cannot
+                  be undone.
+                </p>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setIsDeleteDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </DropdownMenuContent>
         </DropdownMenu>
-
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent className="bg-slate-900 border-slate-800">
-            <DialogHeader>
-              <DialogTitle className="text-white">Delete Project</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p className="text-sm text-slate-400">
-                Are you sure you want to delete this project? This action cannot
-                be undone and will delete all associated data including form
-                fields, client submissions, and exports.
-              </p>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  variant="secondary"
-                  onClick={() => setIsDeleteDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    handleDelete();
-                    setIsDeleteDialogOpen(false);
-                  }}
-                >
-                  Delete Project
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </div>
   );
 }
+

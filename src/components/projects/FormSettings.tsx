@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable react/no-unescaped-entities */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, ChevronUp, ChevronDown, Trash2, Save } from "lucide-react";
+import { Plus, ChevronUp, ChevronDown, Trash2, Save } from 'lucide-react';
 import { toast } from "sonner";
 import { FormField } from "@/types";
 
@@ -166,17 +166,17 @@ export function FormSettings({ projectId }: { projectId: string }) {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h3 className="text-lg font-medium text-white">Form Fields</h3>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button
             variant="outline"
-            className="border-blue-500 text-blue-500"
+            className="border-blue-500 text-blue-500 w-full sm:w-auto"
             onClick={addField}
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Field
           </Button>
           <Button
-            className="hero-button"
+            className="hero-button w-full sm:w-auto"
             onClick={handleSave}
             disabled={saving || formFields.length === 0}
           >
@@ -190,32 +190,42 @@ export function FormSettings({ projectId }: { projectId: string }) {
         {formFields.map((field, index) => (
           <div
             key={index}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700"
+            className="flex flex-col gap-4 p-4 bg-slate-800/50 rounded-lg border border-slate-700"
           >
-            <div className="flex sm:flex-col gap-1">
+            <div className="flex justify-between items-center">
+              <div className="flex gap-1">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-400 hover:text-white"
+                  onClick={() => moveField(index, "up")}
+                  disabled={index === 0}
+                >
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-gray-400 hover:text-white"
+                  onClick={() => moveField(index, "down")}
+                  disabled={index === formFields.length - 1}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </div>
               <Button
-                type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-gray-400 hover:text-white"
-                onClick={() => moveField(index, "up")}
-                disabled={index === 0}
+                className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                onClick={() => removeField(index)}
               >
-                <ChevronUp className="h-4 w-4" />
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-gray-400 hover:text-white"
-                onClick={() => moveField(index, "down")}
-                disabled={index === formFields.length - 1}
-              >
-                <ChevronDown className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
               <div>
                 <Label className="text-white">Field Label</Label>
                 <Input
@@ -257,15 +267,6 @@ export function FormSettings({ projectId }: { projectId: string }) {
                   />
                   <Label className="text-white">Required</Label>
                 </div>
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
-                  onClick={() => removeField(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
             </div>
           </div>
@@ -280,3 +281,4 @@ export function FormSettings({ projectId }: { projectId: string }) {
     </div>
   );
 }
+

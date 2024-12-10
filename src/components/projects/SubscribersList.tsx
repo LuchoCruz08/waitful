@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -21,7 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Download, Pencil, Search, Trash2, LoaderCircle } from "lucide-react";
+import { Download, Pencil, Search, Trash2, LoaderCircle, ChevronDown } from 'lucide-react';
 import { toast } from "sonner";
 
 interface Subscriber {
@@ -37,6 +37,7 @@ export function SubscribersList({ projectId }: { projectId: string }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [editingSubscriber, setEditingSubscriber] = useState<Subscriber | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const supabase = createClient();
 
   useEffect(() => {
@@ -48,8 +49,7 @@ export function SubscribersList({ projectId }: { projectId: string }) {
       const { data: formFields, error: fieldsError } = await supabase
         .from("form_fields")
         .select("*")
-        .eq("project_id", projectId)
-        .order("order", { ascending: true });
+        .eq("project_id", projectId);
 
       if (fieldsError) throw fieldsError;
 
@@ -61,7 +61,11 @@ export function SubscribersList({ projectId }: { projectId: string }) {
 
       if (subsError) throw subsError;
 
-      // Ensure data is properly formatted
+      if (!subscribers) {
+        setSubscribers([]);
+        return;
+      }
+
       const formattedSubscribers = subscribers.map(sub => ({
         ...sub,
         data: typeof sub.data === 'string' ? JSON.parse(sub.data) : sub.data
@@ -71,6 +75,7 @@ export function SubscribersList({ projectId }: { projectId: string }) {
     } catch (error) {
       console.error("Error fetching data:", error);
       toast.error("Failed to fetch subscribers");
+      setSubscribers([]);
     } finally {
       setLoading(false);
     }
@@ -120,22 +125,18 @@ export function SubscribersList({ projectId }: { projectId: string }) {
   const prepareExportData = (subscribers: Subscriber[]) => {
     if (subscribers.length === 0) return { headers: [], rows: [] };
 
-    // Get all unique fields from all subscribers
     const allFields = new Set<string>();
     subscribers.forEach(subscriber => {
       Object.keys(subscriber.data || {}).forEach(key => allFields.add(key));
     });
 
-    // Create headers with standard fields first, then custom fields
     const headers = ["Submission Date", ...Array.from(allFields)];
 
-    // Create rows with all fields
     const rows = subscribers.map(subscriber => {
       const row: Record<string, any> = {
         "Submission Date": formatDate(subscriber.created_at),
       };
 
-      // Add all fields, using empty string for missing values
       Array.from(allFields).forEach(field => {
         row[field] = subscriber.data[field] || "";
       });
@@ -151,14 +152,11 @@ export function SubscribersList({ projectId }: { projectId: string }) {
     if (headers.length === 0) return "";
 
     const csvRows = [
-      // Headers row
       headers.map(header => `"${header}"`).join(","),
-      // Data rows
       ...rows.map(row =>
         headers
           .map(header => {
             const value = row[header];
-            // Handle values that need escaping
             if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
               return `"${value.replace(/"/g, '""')}"`;
             }
@@ -175,7 +173,6 @@ export function SubscribersList({ projectId }: { projectId: string }) {
     try {
       setExporting(true);
 
-      // Fetch fresh data for export
       const { data: exportData, error: exportError } = await supabase
         .from("clients")
         .select("*")
@@ -184,16 +181,13 @@ export function SubscribersList({ projectId }: { projectId: string }) {
 
       if (exportError) throw exportError;
 
-      // Format the data
       const formattedData = exportData.map(sub => ({
         ...sub,
         data: typeof sub.data === 'string' ? JSON.parse(sub.data) : sub.data
       }));
 
-      // Convert to CSV
       const csv = convertToCSV(formattedData);
 
-      // Create and download the file
       const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -206,7 +200,6 @@ export function SubscribersList({ projectId }: { projectId: string }) {
       link.click();
       document.body.removeChild(link);
 
-      // Record the export
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { error: recordError } = await supabase
@@ -239,10 +232,18 @@ export function SubscribersList({ projectId }: { projectId: string }) {
     );
   }
 
-  if (subscribers.length === 0) {
+  if (!loading && subscribers.length === 0) {
     return (
       <div className="text-center py-8">
         <div className="text-gray-400">No subscribers yet.</div>
+      </div>
+    );
+  }
+
+  if (!loading && subscribers.length > 0 && filteredSubscribers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <div className="text-gray-400">No subscribers match your search.</div>
       </div>
     );
   }
@@ -286,7 +287,7 @@ export function SubscribersList({ projectId }: { projectId: string }) {
               <TableHead className="text-white">Submission Date</TableHead>
               {subscribers.length > 0 &&
                 Object.keys(subscribers[0].data || {}).map((key) => (
-                  <TableHead key={key} className="text-white">
+                  <TableHead key={key} className="text-white hidden md:table-cell">
                     {key}
                   </TableHead>
                 ))}
@@ -295,34 +296,58 @@ export function SubscribersList({ projectId }: { projectId: string }) {
           </TableHeader>
           <TableBody>
             {filteredSubscribers.map((subscriber) => (
-              <TableRow key={subscriber.id}>
-                <TableCell className="text-gray-300">
-                  {formatDate(subscriber.created_at)}
-                </TableCell>
-                {Object.entries(subscriber.data || {}).map(([key, value]) => (
-                  <TableCell key={key} className="text-gray-300">
-                    {String(value)}
+              <>
+                <TableRow key={subscriber.id}>
+                  <TableCell className="text-gray-300">
+                    {formatDate(subscriber.created_at)}
                   </TableCell>
-                ))}
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setEditingSubscriber(subscriber)}
-                    className="text-gray-400 hover:text-white"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-400 hover:text-red-300"
-                    onClick={() => handleDelete(subscriber.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+                  {Object.entries(subscriber.data || {}).map(([key, value]) => (
+                    <TableCell key={key} className="text-gray-300 hidden md:table-cell">
+                      {String(value)}
+                    </TableCell>
+                  ))}
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setEditingSubscriber(subscriber)}
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-red-400 hover:text-red-300"
+                      onClick={() => handleDelete(subscriber.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-400 hover:text-white md:hidden"
+                      onClick={() => setExpandedRow(expandedRow === subscriber.id ? null : subscriber.id)}
+                    >
+                      <ChevronDown className={`h-4 w-4 transition-transform ${expandedRow === subscriber.id ? 'rotate-180' : ''}`} />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+                {expandedRow === subscriber.id && (
+                  <TableRow className="md:hidden">
+                    <TableCell colSpan={3}>
+                      <div className="space-y-2">
+                        {Object.entries(subscriber.data || {}).map(([key, value]) => (
+                          <div key={key}>
+                            <span className="font-medium text-white">{key}: </span>
+                            <span className="text-gray-300">{String(value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             ))}
           </TableBody>
         </Table>
@@ -378,3 +403,4 @@ export function SubscribersList({ projectId }: { projectId: string }) {
     </div>
   );
 }
+

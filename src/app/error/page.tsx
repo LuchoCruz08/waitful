@@ -1,17 +1,21 @@
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
+/* eslint-disable react/no-unescaped-entities */
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function Error() {
-  <div className="relative min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4">
-    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f4f4f2e_1px,transparent_1px),linear-gradient(to_bottom,#4f4f4f2e_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]">
-      <h1 className="text-9xl font-black text-gray-700">404</h1>
-      <p className="text-2xl font-bold tracking-tight sm:text-4xl text-white">
-        Uh-oh!
-      </p>
-      <p className="mt-4 text-gray-400">Ha ocurrido un error.</p>
-      <Link href="/">
-        <Button>Volver al inicio</Button>
-      </Link>
+export default function ErrorPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-slate-900/50 border-slate-700">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-white">
+            Oops! Something went wrong
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-center">
+          <p className="text-gray-400 mb-6">
+            We couldn't find what you were looking for. The page might have been removed, renamed, or doesn't exist.
+          </p>
+        </CardContent>
+      </Card>
     </div>
-  </div>;
+  );
 }

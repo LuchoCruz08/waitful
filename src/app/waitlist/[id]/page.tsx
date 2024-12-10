@@ -37,8 +37,7 @@ export default async function WaitlistPage({ params }: PageProps) {
     const { data: formFields, error: formFieldsError } = await supabase
       .from("form_fields")
       .select("*")
-      .eq("project_id", project.id)
-      .order("order", { ascending: true });
+      .eq("project_id", project.id);
 
     if (formFieldsError) {
       console.error("Error fetching form fields:", formFieldsError);
