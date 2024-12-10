@@ -4,14 +4,13 @@ import { redirect } from "next/navigation";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default async function WaitlistPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const supabase = await createClient();
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  const { id: projectId } = params;
+export default async function WaitlistPage({ params }: PageProps) {
+  const supabase = await createClient();
+  const { id: projectId } = await params;
 
   if (!projectId || typeof projectId !== 'string') {
     console.error("Invalid project ID:", projectId);
