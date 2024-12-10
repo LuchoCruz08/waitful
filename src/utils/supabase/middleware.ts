@@ -7,9 +7,14 @@ export async function updateSession(request: NextRequest) {
     request,
   });
 
-  const publicRoutes = ["/", "/login"];
-  if (publicRoutes.includes(request.nextUrl.pathname)) {
-    return supabaseResponse; // Skip authentication for public routes
+  // Define public routes that don't require authentication
+  const publicRoutes = ["/", "/login", "/error", "/waitlist"];
+  const isWaitlistRoute = request.nextUrl.pathname.startsWith('/waitlist/');
+  const isPublicRoute = publicRoutes.includes(request.nextUrl.pathname) || isWaitlistRoute;
+  
+  // Skip authentication for public routes
+  if (isPublicRoute) {
+    return supabaseResponse;
   }
 
   const supabase = createServerClient(
