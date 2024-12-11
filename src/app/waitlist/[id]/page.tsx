@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/public";
 import { redirect } from "next/navigation";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,7 +9,7 @@ interface PageProps {
 }
 
 export default async function WaitlistPage({ params }: PageProps) {
-  const supabase = await createClient();
+  const supabase = await createPublicClient();
   const { id: projectId } = await params;
 
   if (!projectId || typeof projectId !== 'string') {
@@ -20,7 +20,7 @@ export default async function WaitlistPage({ params }: PageProps) {
   try {
     const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("*")
+      .select("name, description, id")
       .eq("id", projectId)
       .single();
 
