@@ -5,24 +5,28 @@ import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default async function WaitlistPage({ params }: PageProps) {
-  const supabase = await createPublicClient();
-  const { id: projectId } = await params;
-
-  if (!projectId || typeof projectId !== 'string') {
-    console.error("Invalid project ID:", projectId);
-    redirect("/error");
-  }
-
   try {
+    const supabase = await createPublicClient();
+    const { id: projectId } = params;
+
+    if (!projectId || typeof projectId !== 'string') {
+      console.error("Invalid project ID:", projectId);
+      redirect("/error");
+    }
+
+    // First, check if the project exists
     const { data: project, error: projectError } = await supabase
       .from("projects")
-      .select("name, description, id")
+      .select("id, name, description")
       .eq("id", projectId)
-      .single();
+      .maybeSingle();
+
+    // Log the response for debugging
+    console.log("Project query response:", { project, projectError });
 
     if (projectError) {
       console.error("Error fetching project:", projectError);
@@ -34,10 +38,11 @@ export default async function WaitlistPage({ params }: PageProps) {
       redirect("/error");
     }
 
+    // Then fetch the form fields
     const { data: formFields, error: formFieldsError } = await supabase
       .from("form_fields")
-      .select("*")
-      .eq("project_id", project.id);
+      .select("id, label, type, required, placeholder")
+      .eq("project_id", projectId);
 
     if (formFieldsError) {
       console.error("Error fetching form fields:", formFieldsError);
@@ -45,7 +50,7 @@ export default async function WaitlistPage({ params }: PageProps) {
     }
 
     if (!formFields || formFields.length === 0) {
-      console.error("No form fields found for project:", project.id);
+      console.error("No form fields found for project:", projectId);
       redirect("/error");
     }
 

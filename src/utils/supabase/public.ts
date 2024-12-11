@@ -24,7 +24,13 @@ export async function createPublicClient() {
       auth: {
         detectSessionInUrl: false,
         persistSession: false,
+        autoRefreshToken: false,
       },
+      global: {
+        headers: {
+          'X-Client-Info': 'waitful-public'
+        }
+      }
     }
   );
 }

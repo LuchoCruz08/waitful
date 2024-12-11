@@ -15,7 +15,7 @@ interface FormField {
   label: string;
   type: string;
   required: boolean;
-  order: number;
+  placeholder?: string;
 }
 
 interface WaitlistFormProps {
@@ -132,7 +132,7 @@ export function WaitlistForm({ projectId, formFields }: WaitlistFormProps) {
       required: field.required,
       className:
         "bg-slate-800 border-slate-700 text-white w-full focus:ring-2 focus:ring-blue-500",
-      placeholder: `Enter your ${field.label.toLowerCase()}`,
+      placeholder: field.placeholder || `Enter your ${field.label.toLowerCase()}`,
       "aria-label": field.label,
     };
 
