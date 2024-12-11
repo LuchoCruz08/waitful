@@ -5,10 +5,16 @@ import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PageProps {
-  params: { id: string };
+  params: {
+    id: string;
+  };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
-export default async function WaitlistPage({ params }: PageProps) {
+export default async function WaitlistPage({
+  params,
+  searchParams,
+}: PageProps) {
   try {
     const supabase = await createPublicClient();
     const { id: projectId } = params;
