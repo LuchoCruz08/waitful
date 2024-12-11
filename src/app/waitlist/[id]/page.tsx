@@ -4,19 +4,15 @@ import { redirect } from "next/navigation";
 import { WaitlistForm } from "@/components/waitlist/WaitlistForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface PageProps {
-  params: {
-    id: string;
-  };
+type Props = {
+  params: { id: string };
   searchParams: { [key: string]: string | string[] | undefined };
-}
+};
 
-export default async function WaitlistPage({
-  params,
-  searchParams,
-}: PageProps) {
+export default async function WaitlistPage(props: Props) {
   try {
     const supabase = await createPublicClient();
+    const { params } = props;
     const { id: projectId } = params;
 
     if (!projectId || typeof projectId !== 'string') {
