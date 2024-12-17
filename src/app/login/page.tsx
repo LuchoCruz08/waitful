@@ -76,7 +76,7 @@ export default function LoginPage() {
         <div className="text-center">
           <p className="text-sm text-gray-400">
             Don't have an account?{" "}
-            <Link href="/waitlist" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+            <Link href="https://waitful.vercel.app/waitlist/7702b68b-ce3d-4e87-84c3-1479b4a21858" className="font-medium text-blue-500 hover:text-blue-400 transition-colors">
               Join the Waitlist <ArrowRight className="inline-block w-4 h-4 ml-1" />
             </Link>
           </p>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Minus } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -9,12 +8,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
-interface FAQItem {
-  question: string;
-  answer: string;
-}
-
-const faqData: FAQItem[] = [
+const faqData = [
   {
     question: "What is Waitful?",
     answer:
@@ -69,38 +63,37 @@ export function FAQ() {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-12">
-      <h2 className="text-3xl font-bold text-center text-white mb-8">
-        Frequently Asked Questions
-      </h2>
-      <Accordion type="multiple" value={openItems} className="space-y-4">
-        {faqData.map((item, index) => (
-          <AccordionItem
-            key={index}
-            value={`item-${index}`}
-            className="bg-slate-900 rounded-lg overflow-hidden"
-          >
-            <AccordionTrigger
-              onClick={() => toggleItem(`item-${index}`)}
-              className="px-6 py-4 text-left hover:no-underline"
+    <section className="bg-slate-950 py-16">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center text-white mb-12">
+          Frequently Asked Questions
+        </h2>
+        <Accordion
+          type="multiple"
+          value={openItems}
+          className="w-full max-w-3xl mx-auto space-y-4"
+        >
+          {faqData.map((item, index) => (
+            <AccordionItem
+              key={index}
+              value={`item-${index}`}
+              className="bg-slate-900 rounded-lg overflow-hidden border-slate-800"
             >
-              <div className="flex items-center justify-between w-full">
+              <AccordionTrigger
+                onClick={() => toggleItem(`item-${index}`)}
+                className="px-6 py-4 text-left hover:no-underline text-white"
+              >
                 <span className="text-lg font-medium text-white">
                   {item.question}
                 </span>
-                {openItems.includes(`item-${index}`) ? (
-                  <Minus className="h-5 w-5 text-blue-500" />
-                ) : (
-                  <Plus className="h-5 w-5 text-blue-500" />
-                )}
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="px-6 py-4 text-gray-300">
-              {item.answer}
-            </AccordionContent>
-          </AccordionItem>
-        ))}
-      </Accordion>
-    </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-6 py-4 text-gray-300">
+                {item.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </div>
+    </section>
   );
 }
