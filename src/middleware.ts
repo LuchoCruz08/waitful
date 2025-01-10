@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   // List of public routes that don't require authentication
-  const publicRoutes = ["/login", "/waitlist"];
+  const publicRoutes = ["/login", "/waitlist", "/terms", "/refund-policy", "/privacy"];
 
   // Check if the current path starts with any of the public routes
   const isPublicRoute = publicRoutes.some((route) =>
