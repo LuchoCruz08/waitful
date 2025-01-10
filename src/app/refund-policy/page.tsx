@@ -33,8 +33,8 @@ export default function RefundPolicy() {
             <h2 className="text-2xl font-semibold mb-4">3. Refund Process</h2>
             <p>
               To request a refund, please contact our support team at
-              lucianovcruz2004@gmail.com. Include your order number and the email
-              address used for the purchase. We aim to process all refund
+              lucianovcruz2004@gmail.com. Include your order number and the
+              email address used for the purchase. We aim to process all refund
               requests within 5-7 business days.
             </p>
           </section>
@@ -89,6 +89,11 @@ export default function RefundPolicy() {
               </Button>
             </Link>
           </div>
+
+          <footer className="mt-16 text-center text-gray-400">
+            This project is developed by{" "}
+            <span className="font-semibold text-white">Cuyo Tech</span>.
+          </footer>
         </div>
       </div>
     </div>

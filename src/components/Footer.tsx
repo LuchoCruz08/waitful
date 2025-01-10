@@ -25,7 +25,33 @@ export function Footer() {
                   className="text-gray-300 hover:text-white"
                   target="_blank"
                 >
-                  <Mail className="h-6 w-6"/>
+                  <Mail className="h-6 w-6" />
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">Legal</h3>
+            <ul className="mt-4 space-y-2">
+              <li>
+                <Link href="/terms" className="text-gray-300 hover:text-white">
+                  Terms and Conditions
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/refund-policy"
+                  className="text-gray-300 hover:text-white"
+                >
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/privacy"
+                  className="text-gray-300 hover:text-white"
+                >
+                  Privacy Policy
                 </Link>
               </li>
             </ul>
@@ -39,4 +65,4 @@ export function Footer() {
       </div>
     </footer>
   );
-} 
+}

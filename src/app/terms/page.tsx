@@ -115,6 +115,16 @@ export default function TermsAndConditions() {
             </p>
           </section>
 
+          <section>
+            <h2 className="text-2xl font-semibold mb-4">11. Acknowledgment</h2>
+            <p>
+              Waitful is a project developed and maintained by{" "}
+              <span className="font-semibold">Cuyo Tech</span>. We are committed
+              to delivering reliable and innovative solutions for your business
+              needs.
+            </p>
+          </section>
+
           <div className="mt-12 text-center">
             <Link href="/">
               <Button className="bg-blue-600 hover:bg-blue-700">

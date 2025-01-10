@@ -34,7 +34,8 @@ export default function PrivacyPolicy() {
               <li>Communications you have with us</li>
             </ul>
             <p className="mt-4">
-              We also automatically collect certain information about how you interact with our services, including:
+              We also automatically collect certain information about how you
+              interact with our services, including:
             </p>
             <ul className="list-disc pl-6 mt-2 space-y-2">
               <li>
